@@ -380,6 +380,16 @@ let args = Array(CommandLine.arguments.dropFirst())
 if args.first == "--watchdog" { exit(watchdog(Array(args.dropFirst()))) }
 if args.first == "--diagnostics" { print(run(pmset, ["-g"]).output); exit(0) }
 if args.first == "--version" { print("FreeMacOn 0.2.0"); exit(0) }
+if args.first == "--self-test" {
+    let sample = "FreeMacOn-self-test"
+    let quick = run("/usr/bin/printf", ["%s", sample], timeout: 3)
+    let started = ProcessInfo.processInfo.systemUptime
+    let slow = run("/bin/sleep", ["5"], timeout: 0.2)
+    let elapsed = ProcessInfo.processInfo.systemUptime - started
+    let ok = quick.code == 0 && quick.output == sample && slow.code == -2 && elapsed < 3
+    print("Non-privileged command runner self-test: \(ok ? "PASS" : "FAIL")")
+    exit(ok ? 0 : 1)
+}
 if args.first == "--check" {
     let setting: String = currentSleep().map { $0 ? "disabled" : "normal" } ?? "unknown"
     let power: String

@@ -1,4 +1,4 @@
-name: Build macOS preview
+name: Build and verify macOS preview
 on:
   push:
   pull_request:
@@ -8,18 +8,55 @@ permissions:
 jobs:
   build:
     runs-on: macos-15
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
+      - name: Shell syntax and simulated watchdog failures
+        run: |
+          bash -n scripts/build.sh scripts/install.sh scripts/verify-lid.sh scripts/run-awake.sh
+          python3 -m unittest discover -s Tests/Adversarial -v
       - name: Test policy (no power settings changed)
         run: swift test
-      - name: Build app
-        run: ./scripts/build.sh
+      - name: Build universal app and run read-only self-test
+        run: UNIVERSAL=1 ./scripts/build.sh
       - name: Package preview
         run: |
           mkdir -p dist
           ditto -c -k --sequesterRsrc --keepParent build/FreeMacOn.app dist/FreeMacOn-preview-macOS.zip
-          shasum -a 256 dist/FreeMacOn-preview-macOS.zip > dist/SHA256SUMS
+          (cd dist && shasum -a 256 FreeMacOn-preview-macOS.zip > SHA256SUMS)
       - uses: actions/upload-artifact@v4
         with:
           name: FreeMacOn-macOS-preview
           path: dist/
+  prerelease:
+    needs: build
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write
+    concurrency:
+      group: freemacon-preview-release
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: FreeMacOn-macOS-preview
+          path: dist
+      - name: Publish immutable developer preview if not already released
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          tag=$(cat release-version.txt)
+          [[ "$tag" =~ ^v[0-9]+\.[0-9]+\.[0-9]+-preview$ ]] || exit 2
+          if gh release view "$tag" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            echo "Preview already published; not overwriting assets."
+            exit 0
+          fi
+          (cd dist && sha256sum -c SHA256SUMS)
+          gh release create "$tag" dist/FreeMacOn-preview-macOS.zip dist/SHA256SUMS \
+            --repo "$GITHUB_REPOSITORY" --target "$GITHUB_SHA" --prerelease --latest=false \
+            --title "FreeMacOn $tag (Developer Preview)" \
+            --notes "Universal arm64/x86_64, ad-hoc signed, not notarized. Automated tests and build are required; physical lid, administrator authorization, thermal and real recovery behavior remain unverified. Supervised testing only. Read docs/SECURITY.md and docs/VALIDATION.md before use."

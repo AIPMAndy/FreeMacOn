@@ -5,7 +5,7 @@ Close your Mac. Keep AI working.
 
 [产品官网](https://aipmandy.github.io/FreeMacOn/) · [English](README.en.md) · [安全与恢复](docs/SECURITY.md) · [真机验收](docs/VALIDATION.md) · [AI 酋长 Andy](https://metaver.vip/)
 
-> v0.1.0 开发预览版。策略单元测试通过，但原生 macOS 编译、管理员授权及实际合盖行为尚未验证。不要在首次真机验证之前替代已有的稳定工具，也不要无人值守过夜运行。
+> v0.2.0 开发预览版。v0.1.0 原生 CI 已通过；v0.2.0 含新恢复机制，须以当前 CI 与 Mac 真机验证为准。管理员授权、实际合盖行为仍未验证。不要在首次真机验证之前替代已有的稳定工具，也不要无人值守过夜运行。
 
 ## 为什么做 FreeMacOn
 
@@ -17,7 +17,7 @@ Close your Mac. Keep AI working.
 - 普通保活：caffeinate -i -w，无需管理员权限；开盖状态不限时，受电量和温度保护。
 - 合盖保活：30 分钟 / 2 小时 / 4 小时 / 8 小时；每次由 macOS 提供管理员授权，不创建永久免密 sudo 规则。
 - 低电量（电池供电且 ≤22%）、严重或临界温度压力、会话到期、主程序心跳消失触发停止。
-- 独立短生命周期守护进程，检查 pmset 状态、恢复并回读；恢复失败保留提示，拒绝叠加已有睡眠覆盖。
+- 独立短生命周期守护进程与第二层系统 shell 监督；管理员执行前验证文件摘要，异常恢复与回读；恢复失败保留提示，拒绝叠加已有睡眠覆盖。
 - 登录时启动可选，默认不自动开启保活；中英菜单、本地运行，无网络请求或遥测。
 
 ## 安装（开发者预览）
@@ -39,7 +39,7 @@ open build/FreeMacOn.app
 
 安装脚本将应用复制至 ~/Applications，不会覆盖已有应用；更新时先停止会话、退出应用，再手动移走旧版本。
 
-本地构建采用 ad-hoc 签名，不是 Apple Developer ID 签名或公证发布。不要为安装关闭 Gatekeeper 或 SIP。
+也可查看 [GitHub Releases](https://github.com/AIPMAndy/FreeMacOn/releases) 获取 CI 通过后生成的 arm64 / x86_64 通用预览 ZIP 和 SHA256SUMS。若尚未生成 release，请使用源码构建。预览版采用 ad-hoc 签名，不是 Apple Developer ID 签名或公证发布。不要为安装关闭 Gatekeeper 或 SIP。
 
 ## 使用
 
@@ -48,6 +48,23 @@ open build/FreeMacOn.app
 3. 结束普通会话，再选「合盖保活 · 30 分钟」，在 macOS 系统授权框确认。等待状态显示「合盖保活已启用」。
 4. 将电脑放在通风桌面，执行 [验收流程](docs/VALIDATION.md)。先用一分钟的合盖测试，确认后台任务持续执行。
 5. 结束会话，等待恢复完成后，用 pmset -g 确认正常睡眠；如果异常则执行恢复命令。
+
+## 实用的只读工具
+
+```bash
+# 已启动合盖会话后，验证实际执行间隔（不修改系统设置）
+./scripts/verify-lid.sh
+# 开盖时，保活到指定任务结束（不保证合盖，不需要管理员授权）
+./scripts/run-awake.sh codex
+# 应用二进制只读状态查询
+./build/FreeMacOn.app/Contents/MacOS/FreeMacOn --check
+```
+
+合盖保活期间，锁屏、Wi-Fi 和 GUI 自动化仍需要单独验证；离开设备时主动锁屏。
+
+## 对抗式审核
+
+[工程审核与剩余风险](docs/ADVERSARIAL-AUDIT.md) · [正式发布验收门槛](docs/RELEASE-GATES.md)
 
 ## 紧急恢复
 
@@ -66,10 +83,11 @@ SleepDisabled 应当为 0 或不出现。若守护锁残留，确认设置恢复
 
 ```bash
 swift test
+python3 -m unittest discover -s Tests/Adversarial -v
 ./scripts/build.sh
 ```
 
-GitHub Actions 配置将执行策略测试及 macOS 原生构建，并生成预览 ZIP 和 SHA256 校验文件；实际运行结果以 [Actions](https://github.com/AIPMAndy/FreeMacOn/actions) 为准。
+GitHub Actions 配置将执行策略测试及 macOS 原生构建，并执行故障注入、原生自检和双架构构建；成功后生成预览 ZIP 与 SHA256 校验文件；实际运行结果以 [Actions](https://github.com/AIPMAndy/FreeMacOn/actions) 为准。
 
 ## 开源调研与许可
 
