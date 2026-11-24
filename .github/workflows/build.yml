@@ -1,0 +1,25 @@
+name: Build macOS preview
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Test policy (no power settings changed)
+        run: swift test
+      - name: Build app
+        run: ./scripts/build.sh
+      - name: Package preview
+        run: |
+          mkdir -p dist
+          ditto -c -k --sequesterRsrc --keepParent build/FreeMacOn.app dist/FreeMacOn-preview-macOS.zip
+          shasum -a 256 dist/FreeMacOn-preview-macOS.zip > dist/SHA256SUMS
+      - uses: actions/upload-artifact@v4
+        with:
+          name: FreeMacOn-macOS-preview
+          path: dist/
