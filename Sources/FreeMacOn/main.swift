@@ -241,8 +241,11 @@ final class App: NSObject, NSApplicationDelegate, NSMenuDelegate {
         let active = ownedStatus?.hasSuffix(":active") == true && isRunning && !stopping
         let busy = isClosed || isRunning || awaiting || stopping
         let icon = active || isRunning ? "bolt.circle.fill" : "bolt.circle"
-        item.button?.image = NSImage(systemSymbolName: icon, accessibilityDescription: "FreeMacOn")
-        item.button?.image?.isTemplate = true
+        let symbol = NSImage(systemSymbolName: icon, accessibilityDescription: "FreeMacOn")
+        let configuration = NSImage.SymbolConfiguration(pointSize: 15, weight: .semibold)
+        let image = symbol?.withSymbolConfiguration(configuration) ?? symbol
+        image?.isTemplate = true
+        item.button?.image = image
         item.button?.title = busy ? " " + timeLeft() : ""
         let state: String
         if rootStatus()?.hasSuffix(":recoveryRequired") == true { state = tr("⚠ 必须手动恢复睡眠", "⚠ Manual recovery required") }
