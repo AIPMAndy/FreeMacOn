@@ -33,5 +33,30 @@ final class PolicyTests: XCTestCase {
     func testDurationBounds() {
         XCTAssertFalse(Policy.validClosedMinutes(0)); XCTAssertTrue(Policy.validClosedMinutes(1)); XCTAssertTrue(Policy.validClosedMinutes(480)); XCTAssertFalse(Policy.validClosedMinutes(481))
     }
+    func testAdversarialReadback() {
+        XCTAssertNil(Policy.sleepDisabled("Currently in use:\n"))
+        XCTAssertNil(Policy.sleepDisabled("System-wide power settings:\n garbage"))
+        XCTAssertNil(Policy.sleepDisabled("Currently in use:\n SleepDisabled 0\n SleepDisabled 1"))
+        XCTAssertNil(Policy.sleepDisabled("Currently in use:\n sleep -1"))
+        XCTAssertNil(Policy.sleepDisabled("Currently in use:\n SleepDisabled 0 trailing"))
+        XCTAssertEqual(Policy.sleepDisabled("Currently in use:\n sleep 10 (sleep prevented by process)"), false)
+        XCTAssertEqual(Policy.sleepDisabled("System-wide power settings:\n SleepDisabled 1"), true)
+    }
+    func testAdversarialPower() {
+        XCTAssertEqual(Policy.power("Now drawing from 'Battery Power'\n -InternalBattery-0 -1%"), .unknown)
+        XCTAssertEqual(Policy.power("Now drawing from 'Battery Power'\n -InternalBattery-0 101%"), .unknown)
+        XCTAssertEqual(Policy.power("Now drawing from 'Battery Power'\n -InternalBattery-0 0%"), .battery(0))
+        XCTAssertEqual(Policy.power("Now drawing from 'Battery Power'\n -InternalBattery-0 100%"), .battery(100))
+        XCTAssertEqual(Policy.power("not AC Power"), .unknown)
+        XCTAssertEqual(Policy.power("Now drawing from 'Battery Power'\n External UPS 99%"), .unknown)
+        XCTAssertEqual(Policy.power("Now drawing from 'Battery Power'\n -InternalBattery-0 70%\n -InternalBattery-1 50%"), .unknown)
+    }
+    func testHeartbeatBoundary() {
+        func check(_ age: TimeInterval) -> Guardrail? {
+            Policy.stopReason(now: now, deadline: nil, heartbeat: now.addingTimeInterval(-age), power: .ac, hot: false)
+        }
+        XCTAssertNil(check(25)); XCTAssertEqual(check(25.01), .heartbeatLost)
+        XCTAssertNil(check(-5)); XCTAssertEqual(check(-5.01), .heartbeatLost)
+    }
     func testQuoting() { XCTAssertEqual(Policy.shellQuote("a'b"), "'a'\\''b'") }
 }
