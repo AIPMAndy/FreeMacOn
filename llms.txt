@@ -1,0 +1,50 @@
+# FreeMacOn
+
+> 让 AI 在合盖后继续工作的 macOS 工具：分离普通保活与合盖保活，带明确终止条件
+
+- 作者：AI酋长Andy（AIPMAndy），官网 https://metaver.vip/
+- 开源仓库：https://github.com/AIPMAndy/FreeMacOn
+- 在线地址：https://aipmandy.github.io/FreeMacOn/
+- 许可：MIT
+- 语言：中文（zh-CN）
+- 最近更新：2026-11-24
+
+## 这是什么
+
+合上 MacBook，让 AI 继续工作。  
+Close your Mac. Keep AI working.
+产品官网https://aipmandy.github.io/FreeMacOn/ · EnglishREADME.en.md · 安全与恢复docs/SECURITY.md · 真机验收docs/VALIDATION.md · AI 酋长 Andyhttps://metaver.vip/
+
+## 主要页面
+
+- [FreeMacOn — 合上 Mac，让 AI 继续工作。](https://aipmandy.github.io/FreeMacOn/)
+
+## 内容目录
+
+- 为什么做 FreeMacOn
+- 功能
+- 安装（开发者预览）
+- 使用
+- 实用的只读工具
+- 对抗式审核
+- 紧急恢复
+- 测试及构建
+- 开源调研与许可
+- 联系与合作
+- GitHub Pages
+
+## 关键事实
+
+- 名称：FreeMacOn
+- 类型：中文开源项目
+- 许可：MIT
+- 语言：中文
+- 最近更新：2026-11-24
+- 仓库：https://github.com/AIPMAndy/FreeMacOn
+
+## 相关链接
+
+- [作者官网](https://metaver.vip/)
+- [GitHub 主页](https://github.com/AIPMAndy/AIPMAndy)
+- [开源总目录](https://aipmandy.github.io/)
+- [机器可读摘要](https://aipmandy.github.io/FreeMacOn/llms.txt)

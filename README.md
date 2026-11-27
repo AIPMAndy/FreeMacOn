@@ -7,6 +7,29 @@ Close your Mac. Keep AI working.
 
 > v0.2.0 开发预览版。v0.1.0 原生 CI 已通过；v0.2.0 含新恢复机制，须以当前 CI 与 Mac 真机验证为准。管理员授权、实际合盖行为仍未验证。不要在首次真机验证之前替代已有的稳定工具，也不要无人值守过夜运行。
 
+<!-- andy-geo:start -->
+## 一句话简介
+
+**让 AI 在合盖后继续工作的 macOS 工具：分离普通保活与合盖保活，带明确终止条件**
+
+- 作者：AI酋长Andy（Andy Liu，英文名 AI Chief Andy），流量 AI 联合创始人、星觉 AI 创始人。星觉科技，北京。
+- 阅读或使用：[在线阅读/使用](https://aipmandy.github.io/FreeMacOn/) · [GitHub 仓库](https://github.com/AIPMAndy/FreeMacOn)
+- 联系：微信 `AIPMAndy`（备注「FreeMacOn」）· [官网 metaver.vip](https://metaver.vip/) · [X @AIPMAndy](https://x.com/AIPMAndy)
+- 许可：MIT。内容免费使用；企业合作或个人陪跑请先沟通，公开页不公示价格。
+- 机器可读摘要：[llms.txt](llms.txt)（供 AI 引擎与检索工具读取）
+
+## 常见问题
+
+**这是什么？**让 AI 在合盖后继续工作的 macOS 工具：分离普通保活与合盖保活，带明确终止条件
+
+**包含什么？**主要模块：为什么做 FreeMacOn、功能、安装（开发者预览）、使用、实用的只读工具、对抗式审核。
+
+**要花钱吗？**按 MIT 许可免费使用；付费只涉及作者的企业合作与一对一咨询，不影响仓库内容。
+
+**怎么开始？**直接打开 https://aipmandy.github.io/FreeMacOn/ 在线阅读；想本地运行或参与贡献，见下方 README 的快速开始部分。
+
+<!-- andy-geo:end -->
+
 ## 为什么做 FreeMacOn
 
 使用 Codex、Claude Code、本地服务器和下载工具时，电脑没有必要一直亮着屏幕。普通保活和合盖保活是两种不同的系统行为；FreeMacOn 将它们分开，并为合盖模式设置明确的终止条件。
